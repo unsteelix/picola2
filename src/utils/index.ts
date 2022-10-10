@@ -66,13 +66,13 @@ export const checkFile = (file: File) => {
   const type = getType(file);
 
   if (type === 'image') {
-    if (!constant.availableImgMimeTypes.includes(mimetype)) {
-      throw new Error(
-        `mimetype ${mimetype} unavailable, try: ${constant.availableImgMimeTypes.concat(
-          ', '
-        )}`
-      );
-    }
+    // if (!constant.availableImgMimeTypes.includes(mimetype)) {
+    //   throw new Error(
+    //     `mimetype ${mimetype} unavailable, try: ${constant.availableImgMimeTypes.concat(
+    //       ', '
+    //     )}`
+    //   );
+    // }
 
     if (size > constant.maxImgSize)
       throw new Error(
