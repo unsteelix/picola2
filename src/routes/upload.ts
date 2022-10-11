@@ -11,8 +11,6 @@ import db from '../utils/db.js';
 import { nanoid } from 'nanoid';
 
 const upload = async (ctx: Context, next: Next) => {
-  // console.log('fields: ', ctx.request.body);
-  // console.log('files: ', ctx.request.files);
   const { files } = ctx.request;
 
   if (files) {
@@ -33,18 +31,6 @@ const upload = async (ctx: Context, next: Next) => {
       ctx.body = res;
     })();
   }
-
-  // if (files) {
-  //   Object.values(files).forEach((el) => {
-  //     if (Array.isArray(el)) {
-  //       listFiles = [...listFiles, ...el];
-  //     } else if (typeof el === 'object') {
-  //       if (el.size > 0) {
-  //         listFiles.push(el);
-  //       }
-  //     }
-  //   });
-  // }
 };
 
 type SaveFileRes = {
@@ -63,10 +49,11 @@ const saveFile = async (file: any): Promise<SaveFileRes> => {
     // check size and format
     checkFile(file);
 
-    const id = nanoid(10);
+    let id = nanoid(10);
     const ext = path.extname(originalFilename);
-    const newName = `${id}${ext}`;
     const type = getType(<any>file);
+
+        let newName = `${id}${ext}`;
 
     let DBrecord: any = {
       type,
@@ -81,10 +68,12 @@ const saveFile = async (file: any): Promise<SaveFileRes> => {
     if (type === 'image') {
       const metadata = await getImgMetadata(filepath);
       const { width, height } = metadata;
-      DBrecord = { ...DBrecord, width, height };
+      id = `${id}_w${width}_h${height}`
+      newName = `${id}${ext}`;
+      DBrecord = { ...DBrecord, id, width, height, newName };
     }
 
-    await moveFile(filepath, path.join('./', 'volume', newName)); // move temp => volume
+    await moveFile(filepath, path.resolve('./', 'volume', newName)); // move temp => volume
 
     // file is good
     if (db.data) {
