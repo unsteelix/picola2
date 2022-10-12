@@ -1,14 +1,7 @@
 import { Context, Next } from 'koa';
 import fs from 'fs';
-import {
-  moveFile,
-  checkFile,
-  getType,
-  getImgMetadata
-} from '../utils/index.js';
 import path from 'path';
 import db from '../utils/db.js';
-import { nanoid } from 'nanoid';
 import hash from 'object-hash';
 import sharp from 'sharp';
 
@@ -19,7 +12,7 @@ const getImage = async (ctx: Context, next: Next) => {
 
   // original
   if (isOriginal(ctx, id)) {
-    console.log('!!! original');
+    console.log('original');
 
     const { newName, mimetype } = image;
 
@@ -31,7 +24,7 @@ const getImage = async (ctx: Context, next: Next) => {
     return;
   } else {
     // NOT original
-    console.log('!!! not original');
+    console.log('not original');
 
     /**
      * data from base image params (from DB)
@@ -57,7 +50,8 @@ const getImage = async (ctx: Context, next: Next) => {
       flip,
       flop,
       blur,
-      sharpen
+      sharpen,
+      noCache
     } = parsedQuery;
 
     /**
@@ -99,7 +93,7 @@ const getImage = async (ctx: Context, next: Next) => {
 
     // cache exists
     if (cachedImage) {
-      console.log('!!! YES cache', cachedImage);
+      console.log('yes cache', cachedImage);
       const { newName, mimetype } = cachedImage;
 
       const filePath = path.resolve('./', 'volume', newName);
@@ -110,10 +104,9 @@ const getImage = async (ctx: Context, next: Next) => {
       return;
     } else {
       // NO cache
-      console.log('!!! NO cache');
+      console.log('no cache');
       const filePath = path.resolve('./', 'volume', image.newName);
 
-      console.log('----------- BEFORE -------------');
       try {
         let newImage = sharp(filePath);
 
@@ -174,41 +167,42 @@ const getImage = async (ctx: Context, next: Next) => {
             `${cacheId}.${info.format}`
           );
 
-          // save to file system
-          fs.writeFile(generatedImagePath, data, (err) => {
-            if (err) {
-              console.log(err.message);
-              throw err;
-            }
-            console.log('generated file has been saved!');
-          });
-          // save to DB
-          if (db.data) {
-            db.data.cache = {
-              ...db.data.cache,
-              [cacheId]: {
-                id: cacheId,
-                originalId: image.id,
-                newName: `${cacheId}.${info.format}`,
-                mimetype: `image/${info.format}`,
-                size: info.size,
-                ext: `.${info.format}`,
-                width: info.width,
-                height: info.height
+          // need save to cache
+          if (!noCache) {
+            // save to file system
+            fs.writeFile(generatedImagePath, data, (err) => {
+              if (err) {
+                console.log(err.message);
+                throw err;
               }
-            };
-
-            db.write();
+              console.log('generated file has been saved!');
+            });
+            // save to DB
+            if (db.data) {
+              db.data.cache = {
+                ...db.data.cache,
+                [cacheId]: {
+                  id: cacheId,
+                  originalId: image.id,
+                  newName: `${cacheId}.${info.format}`,
+                  mimetype: `image/${info.format}`,
+                  size: info.size,
+                  ext: `.${info.format}`,
+                  width: info.width,
+                  height: info.height
+                }
+              };
+              db.write();
+            }
           }
 
-          console.log('$$$$$$$$$$$$', info);
           ctx.set('Content-Type', 'image/' + f);
           ctx.body = data;
         }
 
         return;
       } catch (e) {
-        console.log('ERROR----', e);
+        console.log('ERROR', e);
       }
     }
   }
@@ -226,18 +220,11 @@ const isOriginal = (ctx: Context, id: string) => {
   }
 
   const image = db.data?.original[id];
-  console.log(query);
 
   if (image) {
     const { f, w, h, q } = parseQuery(query);
 
     // format, dimensions and quality the same
-    console.log(
-      sameFormat(image, f),
-      sameDimensions(image, w, h),
-      sameQuality(q)
-    );
-
     if (sameFormat(image, f) && sameDimensions(image, w, h) && sameQuality(q)) {
       return true;
     }
@@ -268,49 +255,13 @@ const parseQuery = (query: any) => {
   let position = query.position || null;
   let interpolation = query.interpolation || null;
   let angle = query.angle ? parseInt(query.angle) : null;
-  let flip = query.flip || null;
-  let flop = query.flop || null;
+  let flip = 'flip' in query ? true : false;
+  let flop = 'flop' in query ? true : false;
   let blur = query.blur ? parseInt(query.blur) : null;
   let sharpen = query.sharp ? parseInt(query.sharp) : null;
+  let noCache = 'noCache' in query || 'nocache' in query ? true : false;
 
-  if (Array.isArray(f)) {
-    f = f[0];
-  }
-  if (Array.isArray(w)) {
-    w = w[0];
-  }
-  if (Array.isArray(h)) {
-    h = h[0];
-  }
-  if (Array.isArray(q)) {
-    q = q[0];
-  }
-  if (Array.isArray(fit)) {
-    fit = fit[0];
-  }
-  if (Array.isArray(position)) {
-    position = position[0];
-  }
-  if (Array.isArray(interpolation)) {
-    interpolation = interpolation[0];
-  }
-  if (Array.isArray(angle)) {
-    angle = angle[0];
-  }
-  if (Array.isArray(flip)) {
-    flip = flip[0];
-  }
-  if (Array.isArray(flop)) {
-    flop = flop[0];
-  }
-  if (Array.isArray(blur)) {
-    blur = blur[0];
-  }
-  if (Array.isArray(sharpen)) {
-    sharpen = sharpen[0];
-  }
-
-  return {
+  const params: any = {
     f,
     w,
     h,
@@ -322,8 +273,17 @@ const parseQuery = (query: any) => {
     flip,
     flop,
     blur,
-    sharpen
+    sharpen,
+    noCache
   };
+
+  const res: any = {};
+
+  Object.entries(params).forEach((el) => {
+    res[el[0]] = Array.isArray(el[1]) ? el[1][0] : el[1];
+  });
+
+  return res;
 };
 
 const sameDimensions = (image: any, w: any, h: any) => {
