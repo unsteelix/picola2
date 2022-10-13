@@ -180,7 +180,7 @@ const getImage = async (ctx: Context, next: Next) => {
             }
           }
 
-          ctx.set('Content-Type', 'image/' + f);
+          ctx.set('Content-Type', 'image/' + info.format);
           ctx.body = data;
         }
 
