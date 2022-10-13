@@ -4,11 +4,11 @@ import {
   moveFile,
   checkFile,
   getType,
-  getImgMetadata
+  getImgMetadata,
+  getNewId
 } from '../utils/index.js';
 import path from 'path';
 import db from '../utils/db.js';
-import { nanoid } from 'nanoid';
 
 const upload = async (ctx: Context, next: Next) => {
   const { files } = ctx.request;
@@ -49,11 +49,11 @@ const saveFile = async (file: any): Promise<SaveFileRes> => {
     // check size and format
     checkFile(file);
 
-    let id = nanoid(10);
+    let id = getNewId();
     const ext = path.extname(originalFilename);
     const type = getType(<any>file);
 
-        let newName = `${id}${ext}`;
+    let newName = `${id}${ext}`;
 
     let DBrecord: any = {
       type,
@@ -68,7 +68,7 @@ const saveFile = async (file: any): Promise<SaveFileRes> => {
     if (type === 'image') {
       const metadata = await getImgMetadata(filepath);
       const { width, height } = metadata;
-      id = `${id}_w${width}_h${height}`
+      id = `${id}_w${width}_h${height}`;
       newName = `${id}${ext}`;
       DBrecord = { ...DBrecord, id, width, height, newName };
     }

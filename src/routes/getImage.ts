@@ -57,20 +57,7 @@ const getImage = async (ctx: Context, next: Next) => {
     /**
      * data from user query
      */
-    const userData: any = {
-      // //// TODO !!!!!!!!!!!!!!!!!!!!!!!!!
-      // f: f ? f : undefined,
-      // w: w ? w : undefined,
-      // h: h ? h : undefined,
-      // q: q ? q : undefined,
-      // fit: fit ? fit : undefined,
-      // position: position ? position : undefined,
-      // interpolation: interpolation ? interpolation : undefined,
-      // flip: flip ? flip : undefined,
-      // flop: flop ? flop : undefined,
-      // blur: blur ? blur : undefined,
-      // sharpen: sharpen ? sharpen : undefined
-    };
+    const userData: any = {};
 
     listParsedParams.forEach((el) => {
       if (el[1]) {
@@ -82,18 +69,15 @@ const getImage = async (ctx: Context, next: Next) => {
       ...initData,
       ...userData
     };
-    //console.log('hashObj', hash(hashObj), 'other', hash({ f: 'webp' }));
-    console.log('hashObj', hashObj);
 
     const cacheId =
       id + '_' + hash(hashObj) + '_w' + hashObj.w + '_h' + hashObj.h;
-    console.log('cacheId: ' + cacheId);
 
     const cachedImage = db.data?.cache[cacheId];
 
     // cache exists
     if (cachedImage) {
-      console.log('yes cache', cachedImage);
+      console.log('cache exist', cachedImage);
       const { newName, mimetype } = cachedImage;
 
       const filePath = path.resolve('./', 'volume', newName);
@@ -103,8 +87,8 @@ const getImage = async (ctx: Context, next: Next) => {
       ctx.body = buffer;
       return;
     } else {
-      // NO cache
-      console.log('no cache');
+      // cache not exist
+      console.log('cache not exist');
       const filePath = path.resolve('./', 'volume', image.newName);
 
       try {

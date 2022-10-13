@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import constant from './constant.js';
-import sizeOf from 'image-size/dist/index.js';
 import sharp from 'sharp';
+import { customAlphabet } from 'nanoid';
 
 interface File {
   filepath: string;
@@ -14,29 +14,6 @@ interface File {
 export const getImgMetadata = async (filepath: string) => {
   return await sharp(filepath).metadata();
 };
-
-/**
- * get width, height of image
- */
-// export const getImgDimensions = async (
-//   path: string
-// ): Promise<{ width: number; height: number }> => {
-//   try {
-//     const dimensions = sizeOf(path);
-//     const { width, height } = dimensions;
-
-//     if (!width || !height) {
-//       throw new Error('could not determine the image dimensions');
-//     }
-
-//     return {
-//       width,
-//       height
-//     };
-//   } catch (err: any) {
-//     throw new Error(err.message);
-//   }
-// };
 
 export const moveFile = async (oldPath: string, newPath: string) => {
   // 1. Create the destination directory
@@ -94,4 +71,9 @@ export const getType = (file: File): 'image' | 'file' => {
     return 'image';
   }
   return 'file';
+};
+
+export const getNewId = () => {
+  const nanoid = customAlphabet('1234567890abcdef', 10);
+  return nanoid();
 };
