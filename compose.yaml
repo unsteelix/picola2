@@ -1,0 +1,13 @@
+services:
+
+  picola2:
+    build: 
+      context: .
+    ports:
+      - 7777:2222
+    volumes:
+      - picola2_volume:/app/volume
+    restart: always
+
+volumes:
+  picola2_volume:
