@@ -30,7 +30,7 @@ export const maxImgSize = process.env.maxFileSize
   ? parseInt(process.env.maxFileSize)
   : 200 * 1000 * 1000; // Byte (200MB)
 
-export const PORT = process.env.PORT ? parseInt(process.env.PORT) : 2000;
+export const PORT = process.env.PORT ? parseInt(process.env.PORT) : 2222;
 export const PASS = process.env.PASS ? parseInt(process.env.PASS) : 'nadkir';
 export const TOKEN = '5pbyIsInN1YiI6ImF1ZHJleSIsImF1ZC';
 
