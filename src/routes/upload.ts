@@ -13,6 +13,8 @@ import db from '../utils/db.js';
 const upload = async (ctx: Context, next: Next) => {
   const { files } = ctx.request;
 
+  console.log('fdfdfd', files);
+
   if (files) {
     // list forms => plain array
     const listFiles: Array<object> = Object.values(files)

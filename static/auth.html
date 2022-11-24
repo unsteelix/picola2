@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+    <title>Picola</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="./main.css" rel="stylesheet" />
+    <script defer type="module">
+        import seamlessRouter from '/seamlessRouter.js';
+        seamlessRouter({prefetch: "visible"});
+    </script>
+    <script src="main.js"></script>
+</head>
+<body>
+    <div class="page">
+        <div class="left-side">
+            <div class="links">
+                <a href="/">Upload</a>
+                <a href="/preview">Preview</a>
+            </div>
+        </div>
+        <div class="right-side">
+            
+            <div class="auth-form">
+                <input type="password" onchange="(e) => onPassChange(e.target.value)" />
+            </div>
+            
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        renderPreview()
+        console.log('********   AUTH    *********')
+    </script>
+</body>
+</html>

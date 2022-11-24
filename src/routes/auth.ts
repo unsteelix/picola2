@@ -1,6 +1,7 @@
 import { Context, Next } from 'koa';
 import constant from '../utils/constant.js';
 
+// set cookie and return token by pass
 const auth = async (ctx: Context, next: Next) => {
   const { pass } = ctx.params;
 
@@ -8,7 +9,7 @@ const auth = async (ctx: Context, next: Next) => {
 
   if (pass === constant.PASS) {
     ctx.status = 200;
-    ctx.cookies.set('token', constant.TOKEN)
+    ctx.cookies.set('token', constant.TOKEN);
     ctx.body = { token: constant.TOKEN };
   } else {
     ctx.status = 401;
