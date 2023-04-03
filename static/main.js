@@ -145,14 +145,52 @@ const renderPreview = async () => {
     const res = await axios.get('/info/all')
     const { files, original } = res.data;
 
-    Object.values(original).forEach(el => {
+    const page = parseFloat(getUrlParameter('page'))
+
+    const all = Object.values(original);
+
+    const countImagesOnPage = 50
+    const start = (page - 1) * countImagesOnPage;
+    const end = start + countImagesOnPage;
+    const filteres = all.slice(start, end)
+
+    filteres.forEach(el => {
         console.log(el)
         const img = `<div class="one-img"><img src="/i/${el.id}?f=jpeg&q=70&w=200&h=200" /></div>`
-        $('.right-side').append(img)
+        $('.list-image').append(img)
     })
 
+    $('.right-side').prepend(`Total ${all.length/countImagesOnPage} pages`)
+
 }
 
-const onPassChange = (pass) => {
-    console.log(pass)
+const onPassInputChange = async (e) => {
+    const pass = e.target.value;
+    if (pass.length >= 6) {
+        try {
+            const res = await axios.get(`/auth/${pass}`)
+            const { data } = res;
+            const { token } = data;
+            window.location.href = `/auth/${pass}`
+        } catch(e) {
+
+        }
+    }
 }
+
+
+const getUrlParameter = (sParam) => {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
+};

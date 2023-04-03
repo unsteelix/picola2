@@ -27,6 +27,9 @@ body {
 .left-side {
     border-right: 1px solid;
     width: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .links {
@@ -103,4 +106,29 @@ form {
 
 .one-info {
     padding-bottom: 0.5rem;
+}
+
+
+/*  pass input  */
+.pass-input {
+    border-top: 1px solid
+}
+
+#pass-input {
+    all: unset;
+    width: 100%;
+    padding: 2px;
+}
+
+/*  list image */
+.list-image {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.list-image .one-img {
+    margin: 10px;
 }

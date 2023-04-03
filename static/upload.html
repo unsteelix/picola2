@@ -15,7 +15,10 @@
         <div class="left-side">
             <div class="links">
                 <a href="/">Upload</a>
-                <a href="/preview">Preview</a>
+                <a href="/preview?page=1">Preview</a>
+            </div>
+            <div class="pass-input">
+                <input type="password" id="pass-input" />
             </div>
         </div>
         <div class="right-side">
@@ -34,7 +37,8 @@
     <script>
         initRender()
         $('#upload-btn-place').on('click', onUploadBtnClick)
-        console.log('********   UPLOAD    *********')
+        $('#pass-input').on('keyup', onPassInputChange)
+        console.log('********   UPLOAD PAGE    *********')
     </script>
 </body>
 </html>
