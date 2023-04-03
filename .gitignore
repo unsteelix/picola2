@@ -2,4 +2,6 @@ node_modules/
 dist/
 volume/*
 !volume/.gitkeep
-.yarn/
+
+# yarn cache
+/.yarn
